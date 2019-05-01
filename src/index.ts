@@ -103,9 +103,7 @@ export type OnPressFunction = (
 ) => void;
 
 function reducer(state: States, action: Events) {
-  const nextState = transitions[state][action];
-  console.log(`${state} -> ${action} -> ${nextState}`);
-  return nextState;
+  return transitions[state][action];
 }
 
 export interface TouchableOptions {
@@ -137,22 +135,19 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const [hover, setHover] = React.useState(false);
   const [showHover, setShowHover] = React.useState(true);
 
-  const { bind } = usePanResponder({
+  // create a pan responder to handle mouse / touch gestures
+  const { bind, terminateCurrentResponder } = usePanResponder({
     onStartShouldSet: () => true,
-    onGrant: () => {
-      console.log("on grant");
-      onStart();
-    },
-    onRelease: (_state, e) => {
-      onEnd(e);
-    },
-    onMove: (_state, e) => {
-      onTouchMove(e);
-    },
-    onTerminate: (_state, e) => {
-      onEnd(e);
-    }
+    onGrant: () => onStart(),
+    onRelease: (_state, e) => onEnd(e),
+    onMove: (_state, e) => onTouchMove(e),
+    onTerminate: (_state, e) => onEnd(e)
   });
+
+  /**
+   * Emit a press event if not disabled
+   * @param e
+   */
 
   function emitPress(
     e: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
@@ -264,6 +259,31 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   }
 
   /**
+   * If our mouse leaves we terminate our responder,
+   * even if our press remains down. This emulates
+   * native mouse behaviour.
+   * @param e
+   */
+
+  function onMouseLeave() {
+    if (hover) {
+      setHover(false);
+    }
+    if (!showHover) {
+      setShowHover(true);
+    }
+    if (state !== "NOT_RESPONDER") {
+      terminateCurrentResponder();
+    }
+  }
+
+  function onMouseEnter() {
+    if (!hover) {
+      setHover(true);
+    }
+  }
+
+  /**
    * Handle timer and disabled side-effects
    */
 
@@ -323,6 +343,8 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
       ...bind,
       onKeyUp: onKey,
       onKeyDown: onKey,
+      onMouseEnter,
+      onMouseLeave,
       ref
     },
     active: !disabled && state === "RESPONDER_PRESSED_IN",
