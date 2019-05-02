@@ -39,4 +39,16 @@ function TouchableHighlight({ options = {} }) {
 storiesOf("Hello", module)
   .add("Example", () => <TouchableHighlight />)
   .add("no delay", () => <TouchableHighlight options={{ delay: 0 }} />)
-  .add("disabled", () => <TouchableHighlight options={{ disabled: true }} />);
+  .add("disabled", () => <TouchableHighlight options={{ disabled: true }} />)
+  .add("within a scroll", () => (
+    <div
+      style={{
+        height: "300px",
+        overflowY: "scroll"
+      }}
+    >
+      <div style={{ height: "350px" }} />
+      <TouchableHighlight />
+      <div style={{ height: "100px" }} />
+    </div>
+  ));
