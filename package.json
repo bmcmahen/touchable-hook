@@ -1,6 +1,6 @@
 {
   "name": "touchable-hook",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a react hook that emulates native touch behaviour for things like buttons, list items, and more",
   "homepage": "https://github.com/bmcmahen/touchable-hook",
   "main": "cjs/index.js",
