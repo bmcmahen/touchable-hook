@@ -7458,10 +7458,10 @@ pako@~1.0.5:
   resolved "https://registry.yarnpkg.com/pako/-/pako-1.0.10.tgz#4328badb5086a426aa90f541977d4955da5c9732"
   integrity sha512-0DTvPVU3ed8+HNXOu5Bs+o//Mbdj9VNQMUOe9oKCwh8l0GNwpTDMKCWbRjgtD291AWnkAgkqA/LOnQS8AmS1tw==
 
-pan-responder-hook@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/pan-responder-hook/-/pan-responder-hook-1.0.3.tgz#598743b2886ee6652728cf15c7dbd4d2cfca47fc"
-  integrity sha512-pL2vL5pF1UucNfTTP4Mw1hBpQj8cjKCT06/j/WctGkbZHVXJ5VPWDsdRKImqzRGEUc3DQ12ubETL1eQ6ZdL0cw==
+pan-responder-hook@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/pan-responder-hook/-/pan-responder-hook-1.0.6.tgz#0923d87bc449513ad23056e060301f2bd65377fc"
+  integrity sha512-TmtgHbRAv2tu7hW47RnBxPTTty4EP4X9+3u7AlMqh+URpN8l58Qsg9YoaE3sUilkkDGSlAbylvjgs6qlsVj6KA==
   dependencies:
     "@types/react" "^16.8.10"
     "@types/react-dom" "^16.8.3"
