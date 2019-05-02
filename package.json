@@ -1,13 +1,27 @@
 {
   "name": "touchable-hook",
   "version": "1.0.0",
-  "description": "",
+  "description": "a react hook that emulates native touch behaviour for things like buttons, list items, and more",
+  "homepage": "https://github.com/bmcmahen/touchable-hook",
   "main": "cjs/index.js",
   "module": "esm/index.js",
   "typings": "esm/index.d.ts",
   "author": "Ben McMahen",
+  "bugs": {
+    "url": "https://github.com/bmcmahen/touchable-hook/issues"
+  },
+  "keywords": [
+    "react",
+    "hook",
+    "touch",
+    "gesture"
+  ],
   "license": "MIT",
   "private": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bmcmahen/touchable-hook.git"
+  },
   "scripts": {
     "test": "jest",
     "test-watch": "jest -w",
