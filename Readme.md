@@ -17,7 +17,7 @@ When building mobile web apps it's challenging to get interactive elements to **
 
 - **hover state is provided only when using a mouse**.
 - **active state is available after a configurable delay**. This is useful for avoiding highlighting list elements when scrolling, but providing immediate visual feedback on elements like buttons.
-- **Mouse and touch support**.
+- **mouse and touch support**.
 - **keyboard support** which emulates both button and anchor behaviour.
 
 ## Install
