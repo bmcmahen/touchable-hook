@@ -8,7 +8,6 @@
 import * as React from "react";
 import { isHoverEnabled } from "./hover-enabled";
 import { usePanResponder } from "pan-responder-hook";
-const noOp = () => {};
 
 /**
  * useTouchable
@@ -111,7 +110,7 @@ export interface TouchableOptions {
   pressExpandPx: number;
   behavior: "button" | "link";
   disabled: boolean;
-  onPress: OnPressFunction;
+  onPress?: OnPressFunction;
 }
 
 const defaultOptions: TouchableOptions = {
@@ -119,7 +118,7 @@ const defaultOptions: TouchableOptions = {
   pressExpandPx: PRESS_EXPAND_PX,
   behavior: "button",
   disabled: false,
-  onPress: noOp
+  onPress: undefined
 };
 
 export function useTouchable(options: Partial<TouchableOptions> = {}) {
@@ -152,7 +151,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   function emitPress(
     e: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
   ) {
-    if (!disabled) {
+    if (!disabled && onPress) {
       onPress(e);
     }
   }

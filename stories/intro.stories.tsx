@@ -79,4 +79,31 @@ storiesOf("Hello", module)
         </Parent>
       </div>
     </div>
-  ));
+  ))
+  .add("without onPress", () => <TouchableWithoutPress />);
+
+function TouchableWithoutPress({ options = {} }) {
+  const { bind, active, hover } = useTouchable({
+    behavior: "button",
+    onPress: undefined,
+    ...options
+  });
+
+  return (
+    <div>
+      <div
+        role="button"
+        tabIndex={0}
+        {...bind}
+        style={{
+          border: hover ? "1px solid black" : "1px solid transparent",
+          userSelect: "none",
+          outline: "none",
+          background: active ? "#08e" : "transparent"
+        }}
+      >
+        This is a touchable highlight
+      </div>
+    </div>
+  );
+}
