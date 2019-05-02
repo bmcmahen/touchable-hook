@@ -2,7 +2,7 @@ import * as React from "react";
 import { storiesOf } from "@storybook/react";
 import { useTouchable } from "../src/index";
 
-function TouchableHighlight() {
+function TouchableHighlight({ options = {} }) {
   const [pressCount, setPressCount] = React.useState(0);
 
   function onPress() {
@@ -12,7 +12,8 @@ function TouchableHighlight() {
 
   const { bind, active, hover } = useTouchable({
     onPress,
-    behavior: "button"
+    behavior: "button",
+    ...options
   });
 
   return (
@@ -35,4 +36,7 @@ function TouchableHighlight() {
   );
 }
 
-storiesOf("Hello", module).add("Example", () => <TouchableHighlight />);
+storiesOf("Hello", module)
+  .add("Example", () => <TouchableHighlight />)
+  .add("no delay", () => <TouchableHighlight options={{ delay: 0 }} />)
+  .add("disabled", () => <TouchableHighlight options={{ disabled: true }} />);
