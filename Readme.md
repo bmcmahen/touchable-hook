@@ -13,7 +13,7 @@ https://twitter.com/intent/follow?screen_name=benmcmahen
 
 ## Why?
 
-When building mobile web apps it's challenging to get interactive elements to **feel** just right. Using this hook makes this easier:
+When building mobile web apps it's challenging to get interactive elements to **feel** just right. Using this hook makes it easier:
 
 - **hover state is provided only when using a mouse**.
 - **active state is available after a configurable delay**. This is useful for avoiding highlighting list elements when scrolling, but providing immediate visual feedback on elements like buttons.
