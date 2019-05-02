@@ -10,6 +10,13 @@
   "bugs": {
     "url": "https://github.com/bmcmahen/touchable-hook/issues"
   },
+  "files": [
+    "cjs",
+    "esm",
+    "src",
+    "umd",
+    "Readme.md"
+  ],
   "keywords": [
     "react",
     "hook",
