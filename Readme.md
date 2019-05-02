@@ -9,15 +9,15 @@ https://twitter.com/intent/follow?screen_name=benmcmahen
 
 </div>
 
-`touchable-hook` provides a react hook that emulates native touch behaviour for building performant, customizable interactive widgets like buttons, list items, etc. It's a limited implementation of the touchable interface found in [react-native-web](https://github.com/necolas/react-native-web/). It provides the basic touchable behaviour for [Sancho-UI](https://github.com/bmcmahen/sancho).
+`touchable-hook` provides a react hook that emulates native touch behaviour for building performant, customizable interactive widgets like buttons, list items, etc. It's a limited implementation of the touchable interface found in [react-native-web](https://github.com/necolas/react-native-web/). It provides the basic touchable behaviour for [Sancho-UI](https://github.com/bmcmahen/sancho) and is built using [pan-responder-hook](https://github.com/bmcmahen/pan-responder-hook).
 
 ## Why?
 
-When building mobile web apps it's challenging to get interactive elements to **feel** just right. Using this hook makes this easier:
+When building mobile web apps it's challenging to get interactive elements to **feel** just right. Using this hook makes it easier:
 
 - **hover state is provided only when using a mouse**.
 - **active state is available after a configurable delay**. This is useful for avoiding highlighting list elements when scrolling, but providing immediate visual feedback on elements like buttons.
-- **Mouse and touch support**.
+- **mouse and touch support**.
 - **keyboard support** which emulates both button and anchor behaviour.
 
 ## Install
