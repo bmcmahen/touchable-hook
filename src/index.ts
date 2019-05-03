@@ -24,6 +24,7 @@ import { usePanResponder } from "pan-responder-hook";
  */
 
 const HIGHLIGHT_DELAY_MS = 100;
+const HIGHLIGHT_DELAY_MS_MOUSE = 0;
 const PRESS_EXPAND_PX = 20;
 
 type States =
@@ -137,7 +138,9 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   // create a pan responder to handle mouse / touch gestures
   const { bind, terminateCurrentResponder } = usePanResponder({
     onStartShouldSet: () => true,
-    onGrant: () => onStart(),
+    onGrant: () => {
+      onStart(isHoverEnabled() ? 0 : undefined);
+    },
     onRelease: (_state, e) => onEnd(e),
     onMove: (_state, e) => onTouchMove(e),
     onTerminate: (_state, e) => onEnd(e)
