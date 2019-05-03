@@ -141,9 +141,9 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     state.current = nextState;
 
     if (nextState === "RESPONDER_PRESSED_IN") {
-      if (!active) setActive(true);
+      setActive(true);
     } else {
-      if (active) setActive(false);
+      setActive(false);
     }
 
     if (nextState === "NOT_RESPONDER") {
