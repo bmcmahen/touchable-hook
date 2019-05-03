@@ -143,7 +143,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     },
     onRelease: (_state, e) => onEnd(e),
     onMove: (_state, e) => onTouchMove(e),
-    onTerminate: (_state, e) => onEnd(e)
+    onTerminate: (_state, e) => onTerminate(e)
   });
 
   /**
@@ -191,6 +191,18 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     }
 
     setShowHover(false);
+  }
+
+  function onTerminate(
+    e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
+  ) {
+    if (state === "NOT_RESPONDER") {
+      return;
+    }
+
+    dispatch("RESPONDER_RELEASE");
+    setShowHover(true);
+    unbindScroll();
   }
 
   function onEnd(
