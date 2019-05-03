@@ -22,8 +22,10 @@ When building mobile web apps it's challenging to get interactive elements to **
 
 ## Install
 
+Install both `touchable-hook` and `pan-responder-hook` using yarn or npm.
+
 ```
-yarn add touchable-hook
+yarn add touchable-hook pan-responder-hook
 ```
 
 ```js
