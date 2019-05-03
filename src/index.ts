@@ -193,6 +193,8 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     setShowHover(false);
   }
 
+  // onTerminate should be disambiguated from onRelease
+  // because it should never trigger onPress events.
   function onTerminate(
     e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
   ) {
