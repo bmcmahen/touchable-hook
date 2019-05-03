@@ -101,10 +101,6 @@ export type OnPressFunction = (
   e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
 ) => void;
 
-function reducer(state: States, action: Events) {
-  return transitions[state][action];
-}
-
 export interface TouchableOptions {
   delay: number;
   pressExpandPx: number;
@@ -128,11 +124,32 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   };
   const disabled = localDisabled;
   const ref = React.useRef<HTMLAnchorElement | HTMLDivElement | any>(null);
-  const [state, dispatch] = React.useReducer(reducer, "NOT_RESPONDER");
   const delayTimer = React.useRef<number>();
   const bounds = React.useRef<ClientRect>();
   const [hover, setHover] = React.useState(false);
   const [showHover, setShowHover] = React.useState(true);
+  const [active, setActive] = React.useState(false);
+  const state = React.useRef<States>("NOT_RESPONDER");
+
+  /**
+   * Transition from one state to another
+   * @param event
+   */
+
+  function dispatch(event: Events) {
+    const nextState = transitions[state.current][event];
+    state.current = nextState;
+
+    if (nextState === "RESPONDER_PRESSED_IN") {
+      if (!active) setActive(true);
+    } else {
+      if (active) setActive(false);
+    }
+
+    if (nextState === "NOT_RESPONDER") {
+      clearTimeout(delayTimer.current);
+    }
+  }
 
   // create a pan responder to handle mouse / touch gestures
   const { bind, terminateCurrentResponder } = usePanResponder({
@@ -195,7 +212,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   // onTerminate should be disambiguated from onRelease
   // because it should never trigger onPress events.
   function onTerminate() {
-    if (state === "NOT_RESPONDER") {
+    if (state.current === "NOT_RESPONDER") {
       return;
     }
 
@@ -208,13 +225,14 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
   ) {
     // consider unbinding the end event instead
-    if (state === "NOT_RESPONDER") {
+    if (state.current === "NOT_RESPONDER") {
       return;
     }
 
     if (
       e &&
-      (state === "RESPONDER_ACTIVE_IN" || state === "RESPONDER_PRESSED_IN")
+      (state.current === "RESPONDER_ACTIVE_IN" ||
+        state.current === "RESPONDER_PRESSED_IN")
     ) {
       emitPress(e);
     }
@@ -244,7 +262,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
    */
 
   function onTouchMove(e: any) {
-    if (state === "NOT_RESPONDER" || state === "ERROR") {
+    if (state.current === "NOT_RESPONDER" || state.current === "ERROR") {
       return;
     }
 
@@ -285,7 +303,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     if (!showHover) {
       setShowHover(true);
     }
-    if (state !== "NOT_RESPONDER") {
+    if (state.current !== "NOT_RESPONDER") {
       terminateCurrentResponder();
     }
   }
@@ -301,12 +319,6 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
    */
 
   React.useEffect(() => {
-    if (state === "NOT_RESPONDER") {
-      clearTimeout(delayTimer.current);
-    }
-  }, [state]);
-
-  React.useEffect(() => {
     return () => {
       clearTimeout(delayTimer.current);
       unbindScroll();
@@ -314,7 +326,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   }, []);
 
   React.useEffect(() => {
-    if (disabled && state !== "NOT_RESPONDER") {
+    if (disabled && state.current !== "NOT_RESPONDER") {
       dispatch("RESPONDER_TERMINATED");
       setShowHover(true);
     }
@@ -360,7 +372,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
       onMouseLeave,
       ref
     },
-    active: !disabled && state === "RESPONDER_PRESSED_IN",
+    active: !disabled && active,
     hover: isHoverEnabled() && !disabled && hover && showHover
   };
 }
