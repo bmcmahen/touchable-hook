@@ -134,6 +134,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const bounds = React.useRef<ClientRect>();
   const [hover, setHover] = React.useState(false);
   const [showHover, setShowHover] = React.useState(true);
+  const isScrolling = React.useRef(true);
 
   // create a pan responder to handle mouse / touch gestures
   const { bind, terminateCurrentResponder } = usePanResponder({
@@ -178,6 +179,10 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
    */
 
   function onStart(delayPressMs = delay) {
+    if (isScrolling.current) {
+      return;
+    }
+
     dispatch("RESPONDER_GRANT");
     bounds.current = ref.current!.getBoundingClientRect();
     delayTimer.current =
@@ -210,6 +215,11 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   function onEnd(
     e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
   ) {
+    if (isScrolling.current) {
+      isScrolling.current = false;
+      return;
+    }
+
     // consider unbinding the end event instead
     if (state === "NOT_RESPONDER") {
       return;
@@ -271,6 +281,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
 
   function onScroll() {
     unbindScroll();
+    isScrolling.current = true;
     dispatch("RESPONDER_TERMINATED");
   }
 
