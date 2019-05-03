@@ -24,7 +24,6 @@ import { usePanResponder } from "pan-responder-hook";
  */
 
 const HIGHLIGHT_DELAY_MS = 100;
-const HIGHLIGHT_DELAY_MS_MOUSE = 0;
 const PRESS_EXPAND_PX = 20;
 
 type States =
@@ -49,12 +48,12 @@ type TransitionType = { [key in Events]: States };
 
 const transitions = {
   NOT_RESPONDER: {
-    DELAY: "ERROR",
+    DELAY: "NOT_RESPONDER",
     RESPONDER_GRANT: "RESPONDER_ACTIVE_IN",
-    RESPONDER_RELEASE: "ERROR",
+    RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
-    ENTER_PRESS_RECT: "ERROR",
-    LEAVE_PRESS_RECT: "ERROR"
+    ENTER_PRESS_RECT: "NOT_RESPONDER",
+    LEAVE_PRESS_RECT: "NOT_RESPONDER"
   },
   RESPONDER_ACTIVE_IN: {
     DELAY: "RESPONDER_PRESSED_IN",
@@ -134,7 +133,6 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const bounds = React.useRef<ClientRect>();
   const [hover, setHover] = React.useState(false);
   const [showHover, setShowHover] = React.useState(true);
-  const isScrolling = React.useRef(true);
 
   // create a pan responder to handle mouse / touch gestures
   const { bind, terminateCurrentResponder } = usePanResponder({
@@ -144,7 +142,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     },
     onRelease: (_state, e) => onEnd(e),
     onMove: (_state, e) => onTouchMove(e),
-    onTerminate: (_state, e) => onTerminate(e)
+    onTerminate: _state => onTerminate()
   });
 
   /**
@@ -161,11 +159,11 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   }
 
   function bindScroll() {
-    document.addEventListener("scroll", onScroll, false);
+    document.addEventListener("scroll", onScroll, true);
   }
 
   function unbindScroll() {
-    document.removeEventListener("scroll", onScroll, false);
+    document.removeEventListener("scroll", onScroll, true);
   }
 
   function afterDelay() {
@@ -179,10 +177,6 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
    */
 
   function onStart(delayPressMs = delay) {
-    if (isScrolling.current) {
-      return;
-    }
-
     dispatch("RESPONDER_GRANT");
     bounds.current = ref.current!.getBoundingClientRect();
     delayTimer.current =
@@ -200,9 +194,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
 
   // onTerminate should be disambiguated from onRelease
   // because it should never trigger onPress events.
-  function onTerminate(
-    e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
-  ) {
+  function onTerminate() {
     if (state === "NOT_RESPONDER") {
       return;
     }
@@ -215,11 +207,6 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   function onEnd(
     e?: React.TouchEvent | React.MouseEvent | React.KeyboardEvent | Event
   ) {
-    if (isScrolling.current) {
-      isScrolling.current = false;
-      return;
-    }
-
     // consider unbinding the end event instead
     if (state === "NOT_RESPONDER") {
       return;
@@ -281,7 +268,6 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
 
   function onScroll() {
     unbindScroll();
-    isScrolling.current = true;
     dispatch("RESPONDER_TERMINATED");
   }
 
