@@ -202,10 +202,9 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
         : undefined;
     if (delayPressMs === 0) {
       dispatch("DELAY");
-    } else {
-      bindScroll();
     }
 
+    bindScroll();
     setShowHover(false);
   }
 
