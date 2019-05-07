@@ -106,6 +106,7 @@ export interface TouchableOptions {
   pressExpandPx: number;
   behavior: "button" | "link";
   disabled: boolean;
+  terminateOnScroll: boolean;
   onPress?: OnPressFunction;
 }
 
@@ -114,11 +115,18 @@ const defaultOptions: TouchableOptions = {
   pressExpandPx: PRESS_EXPAND_PX,
   behavior: "button",
   disabled: false,
+  terminateOnScroll: true,
   onPress: undefined
 };
 
 export function useTouchable(options: Partial<TouchableOptions> = {}) {
-  const { onPress, delay, behavior, disabled: localDisabled } = {
+  const {
+    onPress,
+    terminateOnScroll,
+    delay,
+    behavior,
+    disabled: localDisabled
+  } = {
     ...defaultOptions,
     ...options
   };
@@ -176,7 +184,9 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   }
 
   function bindScroll() {
-    document.addEventListener("scroll", onScroll, true);
+    if (terminateOnScroll) {
+      document.addEventListener("scroll", onScroll, true);
+    }
   }
 
   function unbindScroll() {
