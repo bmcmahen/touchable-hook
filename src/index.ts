@@ -7,7 +7,7 @@
 
 import * as React from "react";
 import { isHoverEnabled } from "./hover-enabled";
-import { usePanResponder } from "pan-responder-hook";
+import { useGestureResponder } from "react-gesture-responder";
 
 /**
  * useTouchable
@@ -160,7 +160,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   }
 
   // create a pan responder to handle mouse / touch gestures
-  const { bind, terminateCurrentResponder } = usePanResponder({
+  const { bind, terminateCurrentResponder } = useGestureResponder({
     onStartShouldSet: () => true,
     onGrant: () => {
       onStart(isHoverEnabled() ? 0 : undefined);
