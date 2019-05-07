@@ -80,7 +80,19 @@ storiesOf("Hello", module)
       </div>
     </div>
   ))
-  .add("without onPress", () => <TouchableWithoutPress />);
+  .add("without onPress", () => <TouchableWithoutPress />)
+  .add("disable scroll terminate", () => (
+    <div
+      style={{
+        overflow: "auto",
+        height: "100px"
+      }}
+    >
+      <div style={{ height: "200px" }}>
+        <TouchableWithoutPress options={{ terminateOnScroll: false }} />
+      </div>
+    </div>
+  ));
 
 function TouchableWithoutPress({ options = {} }) {
   const { bind, active, hover } = useTouchable({
