@@ -34,8 +34,7 @@ type States =
   | "RESPONDER_ACTIVE_OUT"
   | "RESPONDER_PRESSED_IN"
   | "RESPONDER_PRESSED_OUT"
-  | "RESPONDER_LONG_PRESSED_IN"
-  | "RESPONDER_LONG_PRESSED_OUT";
+  | "RESPONDER_LONG_PRESSED_IN";
 
 type Events =
   | "DELAY"
@@ -102,17 +101,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "RESPONDER_PRESSED_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_LONG_PRESSED_OUT",
+    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT",
     LONG_PRESS_DETECTED: "RESPONDER_LONG_PRESSED_IN"
-  },
-  RESPONDER_LONG_PRESSED_OUT: {
-    DELAY: "ERROR",
-    RESPONDER_GRANT: "ERROR",
-    RESPONDER_RELEASE: "NOT_RESPONDER",
-    RESPONDER_TERMINATED: "NOT_RESPONDER",
-    ENTER_PRESS_RECT: "RESPONDER_LONG_PRESSED_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_LONG_PRESSED_OUT",
-    LONG_PRESS_DETECTED: "ERROR"
   },
   ERROR: {
     DELAY: "NOT_RESPONDER",
@@ -131,6 +121,7 @@ export type OnPressFunction = (
 
 export interface TouchableOptions {
   delay: number;
+  longPressDelay: number;
   pressExpandPx: number;
   behavior: "button" | "link";
   disabled: boolean;
@@ -142,6 +133,7 @@ export interface TouchableOptions {
 const defaultOptions: TouchableOptions = {
   delay: HIGHLIGHT_DELAY_MS,
   pressExpandPx: PRESS_EXPAND_PX,
+  longPressDelay: LONG_PRESS_DELAY,
   behavior: "button",
   disabled: false,
   terminateOnScroll: true,
@@ -153,6 +145,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const {
     onPress,
     onLongPress,
+    longPressDelay,
     terminateOnScroll,
     delay,
     behavior,
@@ -257,10 +250,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
       dispatch("DELAY");
     }
 
-    longDelayTimer.current = window.setTimeout(
-      afterLongDelay,
-      LONG_PRESS_DELAY
-    );
+    longDelayTimer.current = window.setTimeout(afterLongDelay, longPressDelay);
 
     bindScroll();
     setShowHover(false);
