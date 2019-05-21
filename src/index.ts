@@ -25,6 +25,7 @@ import { useGestureResponder } from "react-gesture-responder";
 
 const HIGHLIGHT_DELAY_MS = 100;
 const PRESS_EXPAND_PX = 20;
+const LONG_PRESS_DELAY = 500 - HIGHLIGHT_DELAY_MS;
 
 type States =
   | "ERROR"
@@ -32,7 +33,8 @@ type States =
   | "RESPONDER_ACTIVE_IN"
   | "RESPONDER_ACTIVE_OUT"
   | "RESPONDER_PRESSED_IN"
-  | "RESPONDER_PRESSED_OUT";
+  | "RESPONDER_PRESSED_OUT"
+  | "RESPONDER_LONG_PRESSED_IN";
 
 type Events =
   | "DELAY"
@@ -40,7 +42,8 @@ type Events =
   | "RESPONDER_RELEASE"
   | "RESPONDER_TERMINATED"
   | "ENTER_PRESS_RECT"
-  | "LEAVE_PRESS_RECT";
+  | "LEAVE_PRESS_RECT"
+  | "LONG_PRESS_DETECTED";
 
 type TransitionsType = { [key in States]: TransitionType };
 
@@ -53,7 +56,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "NOT_RESPONDER",
-    LEAVE_PRESS_RECT: "NOT_RESPONDER"
+    LEAVE_PRESS_RECT: "NOT_RESPONDER",
+    LONG_PRESS_DETECTED: "NOT_RESPONDER"
   },
   RESPONDER_ACTIVE_IN: {
     DELAY: "RESPONDER_PRESSED_IN",
@@ -61,7 +65,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "RESPONDER_ACTIVE_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_ACTIVE_OUT"
+    LEAVE_PRESS_RECT: "RESPONDER_ACTIVE_OUT",
+    LONG_PRESS_DETECTED: "ERROR"
   },
   RESPONDER_ACTIVE_OUT: {
     DELAY: "RESPONDER_PRESSED_OUT",
@@ -69,7 +74,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "RESPONDER_ACTIVE_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_ACTIVE_OUT"
+    LEAVE_PRESS_RECT: "RESPONDER_ACTIVE_OUT",
+    LONG_PRESS_DETECTED: "ERROR"
   },
   RESPONDER_PRESSED_IN: {
     DELAY: "ERROR",
@@ -77,7 +83,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "RESPONDER_PRESSED_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT"
+    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT",
+    LONG_PRESS_DETECTED: "RESPONDER_LONG_PRESSED_IN"
   },
   RESPONDER_PRESSED_OUT: {
     DELAY: "ERROR",
@@ -85,7 +92,17 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "RESPONDER_PRESSED_IN",
-    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT"
+    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT",
+    LONG_PRESS_DETECTED: "ERROR"
+  },
+  RESPONDER_LONG_PRESSED_IN: {
+    DELAY: "ERROR",
+    RESPONDER_GRANT: "ERROR",
+    RESPONDER_RELEASE: "NOT_RESPONDER",
+    RESPONDER_TERMINATED: "NOT_RESPONDER",
+    ENTER_PRESS_RECT: "RESPONDER_PRESSED_IN",
+    LEAVE_PRESS_RECT: "RESPONDER_PRESSED_OUT",
+    LONG_PRESS_DETECTED: "RESPONDER_LONG_PRESSED_IN"
   },
   ERROR: {
     DELAY: "NOT_RESPONDER",
@@ -93,7 +110,8 @@ const transitions = {
     RESPONDER_RELEASE: "NOT_RESPONDER",
     RESPONDER_TERMINATED: "NOT_RESPONDER",
     ENTER_PRESS_RECT: "NOT_RESPONDER",
-    LEAVE_PRESS_RECT: "NOT_RESPONDER"
+    LEAVE_PRESS_RECT: "NOT_RESPONDER",
+    LONG_PRESS_DETECTED: "NOT_RESPONDER"
   }
 } as TransitionsType;
 
@@ -103,25 +121,31 @@ export type OnPressFunction = (
 
 export interface TouchableOptions {
   delay: number;
+  longPressDelay: number;
   pressExpandPx: number;
   behavior: "button" | "link";
   disabled: boolean;
   terminateOnScroll: boolean;
   onPress?: OnPressFunction;
+  onLongPress?: OnPressFunction;
 }
 
 const defaultOptions: TouchableOptions = {
   delay: HIGHLIGHT_DELAY_MS,
   pressExpandPx: PRESS_EXPAND_PX,
+  longPressDelay: LONG_PRESS_DELAY,
   behavior: "button",
   disabled: false,
   terminateOnScroll: true,
-  onPress: undefined
+  onPress: undefined,
+  onLongPress: undefined
 };
 
 export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const {
     onPress,
+    onLongPress,
+    longPressDelay,
     terminateOnScroll,
     delay,
     behavior,
@@ -133,6 +157,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   const disabled = localDisabled;
   const ref = React.useRef<HTMLAnchorElement | HTMLDivElement | any>(null);
   const delayTimer = React.useRef<number>();
+  const longDelayTimer = React.useRef<number>();
   const bounds = React.useRef<ClientRect>();
   const [hover, setHover] = React.useState(false);
   const [showHover, setShowHover] = React.useState(true);
@@ -148,7 +173,10 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
     const nextState = transitions[state.current][event];
     state.current = nextState;
 
-    if (nextState === "RESPONDER_PRESSED_IN") {
+    if (
+      nextState === "RESPONDER_PRESSED_IN" ||
+      nextState === "RESPONDER_LONG_PRESSED_IN"
+    ) {
       setActive(true);
     } else {
       setActive(false);
@@ -156,6 +184,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
 
     if (nextState === "NOT_RESPONDER") {
       clearTimeout(delayTimer.current);
+      clearTimeout(longDelayTimer.current);
     }
   }
 
@@ -180,6 +209,12 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   ) {
     if (!disabled && onPress) {
       onPress(e);
+    }
+  }
+
+  function emitLongPress() {
+    if (!disabled && onLongPress) {
+      onLongPress();
     }
   }
 
@@ -210,12 +245,20 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
       delayPressMs > 0
         ? window.setTimeout(afterDelay, delayPressMs)
         : undefined;
+
     if (delayPressMs === 0) {
       dispatch("DELAY");
     }
 
+    longDelayTimer.current = window.setTimeout(afterLongDelay, longPressDelay);
+
     bindScroll();
     setShowHover(false);
+  }
+
+  function afterLongDelay() {
+    dispatch("LONG_PRESS_DETECTED");
+    emitLongPress();
   }
 
   // onTerminate should be disambiguated from onRelease
@@ -275,12 +318,15 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
       return;
     }
 
+    clearTimeout(longDelayTimer.current);
+
     const { clientX, clientY } = e.touches && e.touches[0] ? e.touches[0] : e;
     const withinBounds = isWithinActiveBounds(
       clientX,
       clientY,
       bounds.current!
     );
+
     if (withinBounds) {
       dispatch("ENTER_PRESS_RECT");
     } else {
@@ -330,6 +376,7 @@ export function useTouchable(options: Partial<TouchableOptions> = {}) {
   React.useEffect(() => {
     return () => {
       clearTimeout(delayTimer.current);
+      clearTimeout(longDelayTimer.current);
       unbindScroll();
     };
   }, []);

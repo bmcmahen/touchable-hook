@@ -11,8 +11,13 @@ function TouchableHighlight({ options = {} }) {
     setPressCount(pressCount + 1);
   }
 
+  function onLongPress() {
+    console.log("LONG PRESSED");
+  }
+
   const { bind, active, hover } = useTouchable({
     onPress,
+    onLongPress,
     behavior: "button",
     ...options
   });
