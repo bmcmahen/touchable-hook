@@ -19,6 +19,7 @@ When building mobile web apps it's challenging to get interactive elements to **
 - **active state is available after a configurable delay**. This is useful for avoiding highlighting list elements when scrolling, but providing immediate visual feedback on elements like buttons.
 - **mouse and touch support**.
 - **keyboard support** which emulates both button and anchor behaviour.
+- **long press support**
 
 ## Install
 
@@ -31,9 +32,10 @@ yarn add touchable-hook react-gesture-responder
 ```js
 import { useTouchable } from "touchable-hook";
 
-function TouchableHighlight({ onPress }) {
+function TouchableHighlight({ onPress, onLongPress }) {
   const { bind, active, hover } = useTouchable({
     onPress,
+    onLongPress,
     behavior: "button" // or 'link'
   });
 
